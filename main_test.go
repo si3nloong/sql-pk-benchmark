@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	round     = 20
-	findCount = 10
+	insertCount = 5
+	roundCount  = 20
+	findCount   = 10
 )
 
 func setup[T interface {
@@ -23,7 +24,7 @@ func setup[T interface {
 		panic(err)
 	}
 	return ctx, func() {
-		db.DropTable[T](ctx, dbConn)
+		// db.DropTable[T](ctx, dbConn)
 	}
 }
 
@@ -32,7 +33,7 @@ func BenchmarkInsertAutoIncrementID(b *testing.B) {
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < insertCount; i++ {
 		b.StopTimer()
 		data := AutoIncrIDBatch()
 		b.StartTimer()
@@ -47,7 +48,7 @@ func BenchmarkInsertUUID(b *testing.B) {
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < insertCount; i++ {
 		b.StopTimer()
 		data := NormalUUIDBatch()
 		b.StartTimer()
@@ -62,7 +63,7 @@ func BenchmarkInsertOrderedUUID(b *testing.B) {
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < insertCount; i++ {
 		b.StopTimer()
 		data := NormalOrderedUUIDBatch()
 		b.StartTimer()
@@ -77,7 +78,7 @@ func BenchmarkInsertBinaryUUID(b *testing.B) {
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < insertCount; i++ {
 		b.StopTimer()
 		data := BinaryUUIDBatch()
 		b.StartTimer()
@@ -92,7 +93,7 @@ func BenchmarkInsertBinaryOrderedUUID(b *testing.B) {
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < insertCount; i++ {
 		b.StopTimer()
 		data := BinaryOrderedUUIDBatch()
 		b.StartTimer()
@@ -258,7 +259,7 @@ func benchmarkGetList[T interface {
 
 	b.ResetTimer()
 	b.StartTimer()
-	for i := 0; i < round; i++ {
+	for i := 0; i < roundCount; i++ {
 		if _, err := getList[T, Ptr](ctx); err != nil {
 			panic(err)
 		}
