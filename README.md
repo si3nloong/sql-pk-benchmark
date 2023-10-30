@@ -1,4 +1,4 @@
-# SQL Primary Key benchmark
+# SQL Primary Key Benchmarks
 
 > This is an experiment to test the speed differences between different type of primary key.
 
@@ -12,13 +12,13 @@
 
 ## Space Allocation
 
-| Statement                         | Size (MB) |
-| --------------------------------- | --------- |
-| Auto Increment BigInt Primary Key | 125.2     |
-| UUID Primary Key                  | 506.8     |
-| Ordered UUID Primary Key          | 350       |
-| Binary UUID Primary Key           | 352.7     |
-| Ordered Binary UUID Primary Key   | 205.3     |
+| Statement                         | Size (MB) in 1M records | Size (MB) in 5M records |
+| --------------------------------- | ----------------------: | ----------------------: |
+| Auto Increment BigInt Primary Key |                    32.6 |                   125.2 |
+| UUID Primary Key                  |                    62.7 |                   506.8 |
+| Ordered UUID Primary Key          |                    62.7 |                   350.0 |
+| Binary UUID Primary Key           |                    41.6 |                   352.7 |
+| Ordered Binary UUID Primary Key   |                    41.6 |                   205.3 |
 
 ## Benchmarks
 
@@ -45,9 +45,29 @@ BenchmarkFindByIDBinaryOrderedUUID-8    1000000000               0.004241 ns/op 
 Get 100 records
 
 ```bash
-BenchmarkGetListAutoIncrement-8         1000000000               0.003163 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListUUID-8                  1000000000               0.002804 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListOrderedUUID-8           1000000000               0.002517 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryUUID-8            1000000000               0.002311 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.002190 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListAutoIncrement-8         1000000000               0.004683 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListUUID-8                  1000000000               0.004217 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListOrderedUUID-8           1000000000               0.003579 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListBinaryUUID-8            1000000000               0.003749 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.003376 ns/op        0 B/op          0 allocs/op
+```
+
+Get 100 records with order by asc.
+
+```bash
+BenchmarkGetListAutoIncrement-8         1000000000               0.004461 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListUUID-8                  1000000000               0.004077 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListOrderedUUID-8           1000000000               0.003914 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListBinaryUUID-8            1000000000               0.003745 ns/op        0 B/op          0 allocs/op
+BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.003627 ns/op        0 B/op          0 allocs/op
+```
+
+Get List using random primary key cursor and order by asc.
+
+```bash
+BenchmarkGetRandomlyAutoIncrement-8             1000000000               0.002429 ns/op        0 B/op          0 allocs/op
+BenchmarkGetRandomlyUUID-8                      1000000000               0.002549 ns/op        0 B/op          0 allocs/op
+BenchmarkGetRandomlyOrderedUUID-8               1000000000               0.002311 ns/op        0 B/op          0 allocs/op
+BenchmarkGetRandomlyBinaryUUID-8                1000000000               0.002629 ns/op        0 B/op          0 allocs/op
+BenchmarkGetRandomlyBinaryOrderedUUID-8         1000000000               0.002601 ns/op        0 B/op          0 allocs/op
 ```

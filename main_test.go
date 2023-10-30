@@ -233,12 +233,14 @@ func BenchmarkFindByIDBinaryOrderedUUID(b *testing.B) {
 }
 
 func getList[T interface {
+	sequel.Keyer
 	sequel.Tabler
 	sequel.Columner
 }, Ptr sequel.Scanner[T]](ctx context.Context) ([]T, error) {
 	var v T
+	pkName, _, _ := v.PK()
 	result, err := db.QueryScan[T, Ptr](ctx, dbConn,
-		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` LIMIT 100;`)
+		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` ORDER BY `+pkName+` LIMIT 100;`)
 	if err != nil {
 		return nil, err
 	}
@@ -247,6 +249,7 @@ func getList[T interface {
 
 func benchmarkGetList[T interface {
 	sequel.Tabler
+	sequel.Keyer
 	sequel.Columner
 	sequel.Migrator
 }, Ptr sequel.Scanner[T]](b *testing.B) {
@@ -266,19 +269,80 @@ func benchmarkGetList[T interface {
 func BenchmarkGetListAutoIncrement(b *testing.B) {
 	benchmarkGetList[AutoIncrID](b)
 }
-
 func BenchmarkGetListUUID(b *testing.B) {
 	benchmarkGetList[NormalUUID](b)
 }
-
 func BenchmarkGetListOrderedUUID(b *testing.B) {
 	benchmarkGetList[NormalOrderedUUID](b)
 }
-
 func BenchmarkGetListBinaryUUID(b *testing.B) {
 	benchmarkGetList[BinaryUUID](b)
 }
-
 func BenchmarkGetListBinaryOrderedUUID(b *testing.B) {
 	benchmarkGetList[BinaryOrderedUUID](b)
+}
+
+func getListByCursor[T interface {
+	sequel.Tabler
+	sequel.Columner
+}, Ptr interface {
+	sequel.Scanner[T]
+	sequel.Keyer
+}](ctx context.Context, vi Ptr) ([]T, error) {
+	var v T
+	pkName, _, pk := vi.PK()
+	result, err := db.QueryScan[T, Ptr](ctx, dbConn,
+		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` WHERE `+pkName+` = ? ORDER BY `+pkName+` LIMIT 100;`, pk)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func benchmarkGetRandomly[T interface {
+	sequel.Tabler
+	sequel.Columner
+	sequel.Migrator
+}, Ptr interface {
+	sequel.Keyer
+	sequel.Scanner[T]
+}](b *testing.B) {
+	ctx, cleanUp := setup[T]()
+	defer cleanUp()
+
+	randomRecord := make([]*T, findCount)
+	for i := 0; i < findCount; i++ {
+		data, err := findRandomly[T, Ptr](ctx)
+		if err != nil {
+			panic(err)
+		}
+		randomRecord[i] = data
+	}
+
+	b.ResetTimer()
+	b.StartTimer()
+	for i := 0; i < findCount; i++ {
+		if result, err := getListByCursor[T, Ptr](ctx, randomRecord[i]); err != nil {
+			panic(err)
+		} else if len(result) == 0 {
+			panic("no record")
+		}
+	}
+	b.StopTimer()
+}
+
+func BenchmarkGetRandomlyAutoIncrement(b *testing.B) {
+	benchmarkGetRandomly[AutoIncrID](b)
+}
+func BenchmarkGetRandomlyUUID(b *testing.B) {
+	benchmarkGetRandomly[NormalUUID](b)
+}
+func BenchmarkGetRandomlyOrderedUUID(b *testing.B) {
+	benchmarkGetRandomly[NormalOrderedUUID](b)
+}
+func BenchmarkGetRandomlyBinaryUUID(b *testing.B) {
+	benchmarkGetRandomly[BinaryUUID](b)
+}
+func BenchmarkGetRandomlyBinaryOrderedUUID(b *testing.B) {
+	benchmarkGetRandomly[BinaryOrderedUUID](b)
 }
