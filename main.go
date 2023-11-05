@@ -8,6 +8,7 @@ import (
 	"github.com/gofrs/uuid/v5"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/si3nloong/sqlgen/sequel/dialect/mysql"
 )
 
 const (

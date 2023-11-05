@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"database/sql/driver"
+	"math/rand"
 	"strings"
 	"testing"
 
@@ -10,9 +12,9 @@ import (
 )
 
 const (
-	insertCount = 5
-	roundCount  = 20
-	findCount   = 10
+// insertCount = 1000
+// roundCount = 20
+// findCount = 10
 )
 
 func setup[T interface {
@@ -28,76 +30,96 @@ func setup[T interface {
 	}
 }
 
-func BenchmarkInsertAutoIncrementID(b *testing.B) {
-	ctx, cleanUp := setup[AutoIncrID]()
+func BenchmarkAutoIncrementIDInsert(b *testing.B) {
+	var (
+		ctx, cleanUp = setup[AutoIncrID]()
+		data         []AutoIncrID
+		err          error
+	)
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < insertCount; i++ {
+	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		data := AutoIncrIDBatch()
+		data = AutoIncrIDBatch()
 		b.StartTimer()
-		if _, err := db.InsertInto(ctx, dbConn, data); err != nil {
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-func BenchmarkInsertUUID(b *testing.B) {
-	ctx, cleanUp := setup[NormalUUID]()
+func BenchmarkUUIDInsert(b *testing.B) {
+	var (
+		ctx, cleanUp = setup[NormalUUID]()
+		data         []NormalUUID
+		err          error
+	)
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < insertCount; i++ {
+	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		data := NormalUUIDBatch()
+		data = NormalUUIDBatch()
 		b.StartTimer()
-		if _, err := db.InsertInto(ctx, dbConn, data); err != nil {
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-func BenchmarkInsertOrderedUUID(b *testing.B) {
-	ctx, cleanUp := setup[NormalOrderedUUID]()
+func BenchmarkOrderedUUIDInsert(b *testing.B) {
+	var (
+		ctx, cleanUp = setup[NormalOrderedUUID]()
+		data         []NormalOrderedUUID
+		err          error
+	)
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < insertCount; i++ {
+	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		data := NormalOrderedUUIDBatch()
+		data = NormalOrderedUUIDBatch()
 		b.StartTimer()
-		if _, err := db.InsertInto(ctx, dbConn, data); err != nil {
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-func BenchmarkInsertBinaryUUID(b *testing.B) {
-	ctx, cleanUp := setup[BinaryUUID]()
+func BenchmarkBinaryUUIDInsert(b *testing.B) {
+	var (
+		ctx, cleanUp = setup[BinaryUUID]()
+		data         []BinaryUUID
+		err          error
+	)
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < insertCount; i++ {
+	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		data := BinaryUUIDBatch()
+		data = BinaryUUIDBatch()
 		b.StartTimer()
-		if _, err := db.InsertInto(ctx, dbConn, data); err != nil {
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-func BenchmarkInsertBinaryOrderedUUID(b *testing.B) {
-	ctx, cleanUp := setup[BinaryOrderedUUID]()
+func BenchmarkBinaryOrderedUUIDInsert(b *testing.B) {
+	var (
+		ctx, cleanUp = setup[BinaryOrderedUUID]()
+		data         []BinaryOrderedUUID
+		err          error
+	)
 	defer cleanUp()
 
 	b.ResetTimer()
-	for i := 0; i < insertCount; i++ {
+	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		data := BinaryOrderedUUIDBatch()
+		data = BinaryOrderedUUIDBatch()
 		b.StartTimer()
-		if _, err := db.InsertInto(ctx, dbConn, data); err != nil {
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -106,147 +128,87 @@ func BenchmarkInsertBinaryOrderedUUID(b *testing.B) {
 func findRandomly[T interface {
 	sequel.Tabler
 	sequel.Columner
-}, Ptr sequel.Scanner[T]](ctx context.Context) (*T, error) {
-	var v T
-	result, err := db.QueryScan[T, Ptr](ctx, dbConn, `SELECT `+
-		strings.Join(v.Columns(), ",")+
-		" FROM "+v.TableName()+" ORDER BY RAND() LIMIT 1")
+}, Ptr sequel.Scanner[T]](ctx context.Context) ([]Ptr, error) {
+	var (
+		v     T
+		query = `SELECT ` +
+			strings.Join(v.Columns(), ",") +
+			" FROM " + v.TableName() + " ORDER BY RAND() LIMIT 50"
+	)
+	result, err := db.QueryScan[T, Ptr](ctx, dbConn, query)
 	if err != nil {
 		return nil, err
 	}
-	return &result[0], nil
+	ptrs := make([]Ptr, len(result))
+	for i := 0; i < len(result); i++ {
+		ptrs[i] = &result[i]
+	}
+	return ptrs, nil
 }
 
-func BenchmarkFindByIDAutoIncrementID(b *testing.B) {
-	ctx, cleanUp := setup[AutoIncrID]()
-	defer cleanUp()
-
-	randomRecord := make([]*AutoIncrID, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[AutoIncrID](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
-	}
-
-	b.ResetTimer()
-	b.StartTimer()
-
-	for i := range randomRecord {
-		if err := db.FindOne(ctx, dbConn, randomRecord[i]); err != nil {
-			panic(err)
-		}
-	}
-
-	b.StopTimer()
-}
-
-func BenchmarkFindByIDUUID(b *testing.B) {
-	ctx, cleanUp := setup[NormalUUID]()
-	defer cleanUp()
-
-	randomRecord := make([]*NormalUUID, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[NormalUUID](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
-	}
-
-	b.ResetTimer()
-	b.StartTimer()
-
-	for i := range randomRecord {
-		if err := db.FindOne(ctx, dbConn, randomRecord[i]); err != nil {
-			panic(err)
-		}
-	}
-
-	b.StopTimer()
-}
-
-func BenchmarkFindByIDOrderedUUID(b *testing.B) {
-	ctx, cleanUp := setup[NormalOrderedUUID]()
-	defer cleanUp()
-	randomRecord := make([]*NormalOrderedUUID, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[NormalOrderedUUID](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
-	}
-
-	b.ResetTimer()
-	b.StartTimer()
-	for i := range randomRecord {
-		if err := db.FindOne(ctx, dbConn, randomRecord[i]); err != nil {
-			panic(err)
-		}
-	}
-	b.StopTimer()
-}
-
-func BenchmarkFindByIDBinaryUUID(b *testing.B) {
-	ctx, cleanUp := setup[BinaryUUID]()
-	defer cleanUp()
-	randomRecord := make([]*BinaryUUID, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[BinaryUUID](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
-	}
-
-	b.ResetTimer()
-	b.StartTimer()
-	for i := range randomRecord {
-		if err := db.FindOne(ctx, dbConn, randomRecord[i]); err != nil {
-			panic(err)
-		}
-	}
-	b.StopTimer()
-}
-
-func BenchmarkFindByIDBinaryOrderedUUID(b *testing.B) {
-	ctx, cleanUp := setup[BinaryOrderedUUID]()
-	defer cleanUp()
-	randomRecord := make([]*BinaryOrderedUUID, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[BinaryOrderedUUID](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
-	}
-
-	b.ResetTimer()
-	b.StartTimer()
-	for i := range randomRecord {
-		if err := db.FindOne(ctx, dbConn, randomRecord[i]); err != nil {
-			panic(err)
-		}
-	}
-	b.StopTimer()
-}
-
-func getList[T interface {
-	sequel.Keyer
+func benchmarkFindByID[T interface {
+	sequel.Migrator
 	sequel.Tabler
 	sequel.Columner
-}, Ptr sequel.Scanner[T]](ctx context.Context) ([]T, error) {
-	var v T
-	pkName, _, _ := v.PK()
-	result, err := db.QueryScan[T, Ptr](ctx, dbConn,
-		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` ORDER BY `+pkName+` LIMIT 100;`)
+	sequel.Keyer
+	sequel.Valuer
+}, Ptr sequel.KeyValueScanner[T]](b *testing.B) {
+	var (
+		ctx, cleanUp = setup[T]()
+		data         []Ptr
+		idx          int
+		err          error
+	)
+	defer cleanUp()
+
+	data, err = findRandomly[T, Ptr](ctx)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return result, nil
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		idx = rand.Intn(len(data))
+		if err = db.FindOne(ctx, dbConn, data[idx]); err != nil {
+			panic(err)
+		}
+	}
 }
+
+func BenchmarkAutoIncrementIDFindByID(b *testing.B) {
+	benchmarkFindByID[AutoIncrID](b)
+}
+
+func BenchmarkUUIDFindByID(b *testing.B) {
+	benchmarkFindByID[NormalUUID](b)
+}
+
+func BenchmarkOrderedUUIDFindByID(b *testing.B) {
+	benchmarkFindByID[NormalOrderedUUID](b)
+}
+
+func BenchmarkBinaryUUIDFindByID(b *testing.B) {
+	benchmarkFindByID[BinaryUUID](b)
+}
+
+func BenchmarkBinaryOrderedUUIDFindByID(b *testing.B) {
+	benchmarkFindByID[BinaryOrderedUUID](b)
+}
+
+// func getList[T interface {
+// 	sequel.Keyer
+// 	sequel.Tabler
+// 	sequel.Columner
+// }, Ptr sequel.Scanner[T]](ctx context.Context) ([]T, error) {
+// 	var v T
+// 	pkName, _, _ := v.PK()
+// 	result, err := db.QueryScan[T, Ptr](ctx, dbConn,
+// 		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` ORDER BY `+pkName+` LIMIT 100;`)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return result, nil
+// }
 
 func benchmarkGetList[T interface {
 	sequel.Tabler
@@ -254,50 +216,44 @@ func benchmarkGetList[T interface {
 	sequel.Columner
 	sequel.Migrator
 }, Ptr sequel.Scanner[T]](b *testing.B) {
-	ctx, cleanUp := setup[T]()
+	var (
+		ctx, cleanUp = setup[T]()
+		v            T
+		pkName       string
+		query        string
+		result       []T
+		err          error
+	)
 	defer cleanUp()
 
+	pkName, _, _ = v.PK()
+	query = `SELECT ` + strings.Join(v.Columns(), ",") + ` FROM ` + v.TableName() + ` ORDER BY ` + pkName + ` LIMIT 100;`
+
 	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < roundCount; i++ {
-		if _, err := getList[T, Ptr](ctx); err != nil {
+	for i := 0; i < b.N; i++ {
+		result, err = db.QueryScan[T, Ptr](ctx, dbConn, query)
+		if err != nil {
 			panic(err)
+		} else if len(result) == 0 {
+			panic("no record")
 		}
 	}
-	b.StopTimer()
 }
 
-func BenchmarkGetListAutoIncrement(b *testing.B) {
+func BenchmarkAutoIncrementIDGetList(b *testing.B) {
 	benchmarkGetList[AutoIncrID](b)
 }
-func BenchmarkGetListUUID(b *testing.B) {
+func BenchmarkUUIDGetList(b *testing.B) {
 	benchmarkGetList[NormalUUID](b)
 }
-func BenchmarkGetListOrderedUUID(b *testing.B) {
+func BenchmarkOrderedUUIDGetList(b *testing.B) {
 	benchmarkGetList[NormalOrderedUUID](b)
 }
-func BenchmarkGetListBinaryUUID(b *testing.B) {
+func BenchmarkBinaryUUIDGetList(b *testing.B) {
 	benchmarkGetList[BinaryUUID](b)
 }
-func BenchmarkGetListBinaryOrderedUUID(b *testing.B) {
+func BenchmarkBinaryOrderedUUIDGetList(b *testing.B) {
 	benchmarkGetList[BinaryOrderedUUID](b)
-}
-
-func getListByCursor[T interface {
-	sequel.Tabler
-	sequel.Columner
-}, Ptr interface {
-	sequel.Scanner[T]
-	sequel.Keyer
-}](ctx context.Context, vi Ptr) ([]T, error) {
-	var v T
-	pkName, _, pk := vi.PK()
-	result, err := db.QueryScan[T, Ptr](ctx, dbConn,
-		`SELECT `+strings.Join(v.Columns(), ",")+` FROM `+v.TableName()+` WHERE `+pkName+` = ? ORDER BY `+pkName+` LIMIT 100;`, pk)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 func benchmarkGetRandomly[T interface {
@@ -308,42 +264,55 @@ func benchmarkGetRandomly[T interface {
 	sequel.Keyer
 	sequel.Scanner[T]
 }](b *testing.B) {
-	ctx, cleanUp := setup[T]()
+	var (
+		ctx, cleanUp = setup[T]()
+		data         []Ptr
+		err          error
+	)
 	defer cleanUp()
 
-	randomRecord := make([]*T, findCount)
-	for i := 0; i < findCount; i++ {
-		data, err := findRandomly[T, Ptr](ctx)
-		if err != nil {
-			panic(err)
-		}
-		randomRecord[i] = data
+	var (
+		v      T
+		pkName string
+		idx    int
+		pk     driver.Value
+		query  string
+		result []T
+	)
+
+	data, err = findRandomly[T, Ptr](ctx)
+	if err != nil {
+		panic(err)
 	}
 
 	b.ResetTimer()
-	b.StartTimer()
-	for i := 0; i < findCount; i++ {
-		if result, err := getListByCursor[T, Ptr](ctx, randomRecord[i]); err != nil {
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		idx = rand.Intn(len(data))
+		pkName, _, pk = data[idx].PK()
+		query = `SELECT ` + strings.Join(v.Columns(), ",") + ` FROM ` + v.TableName() + ` WHERE ` + pkName + ` >= ? ORDER BY ` + pkName + ` LIMIT 100;`
+		b.StartTimer()
+		result, err = db.QueryScan[T, Ptr](ctx, dbConn, query, pk)
+		if err != nil {
 			panic(err)
 		} else if len(result) == 0 {
 			panic("no record")
 		}
 	}
-	b.StopTimer()
 }
 
-func BenchmarkGetRandomlyAutoIncrement(b *testing.B) {
+func BenchmarkAutoIncrementIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[AutoIncrID](b)
 }
-func BenchmarkGetRandomlyUUID(b *testing.B) {
+func BenchmarkUUIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[NormalUUID](b)
 }
-func BenchmarkGetRandomlyOrderedUUID(b *testing.B) {
+func BenchmarkOrderedUUIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[NormalOrderedUUID](b)
 }
-func BenchmarkGetRandomlyBinaryUUID(b *testing.B) {
+func BenchmarkBinaryUUIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[BinaryUUID](b)
 }
-func BenchmarkGetRandomlyBinaryOrderedUUID(b *testing.B) {
+func BenchmarkBinaryOrderedUUIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[BinaryOrderedUUID](b)
 }

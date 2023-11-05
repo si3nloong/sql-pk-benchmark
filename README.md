@@ -11,6 +11,8 @@
 
 Record set: **1,000,000** (1M) and **5,000,000** (5M)
 
+
+
 ## Space Allocation
 
 | Statement                         | Size (MB) in 1M records | Size (MB) in 5M records |
@@ -21,114 +23,33 @@ Record set: **1,000,000** (1M) and **5,000,000** (5M)
 | Binary UUID Primary Key           |                    41.6 |                   352.7 |
 | Ordered Binary UUID Primary Key   |                    41.6 |                   205.3 |
 
+## How to run tests?
+
+```bash
+go install golang.org/x/perf/cmd/benchstat@latest
+
+# go test -benchmem -run=^$ -bench=^BenchmarkAutoIncrementID -benchtime=5s -count=10 | tee stat1.txt
+go test -run=^$ -bench=^BenchmarkAutoIncrementID -benchtime=5s -count=10 | tee stat1.txt
+go test -run=^$ -bench=^BenchmarkUUID -benchtime=5s -count=10 | tee stat2.txt
+go test -run=^$ -bench=^BenchmarkOrderedUUID -benchtime=5s -count=10 | tee stat3.txt
+go test -run=^$ -bench=^BenchmarkBinaryUUID -benchtime=5s -count=10 | tee stat4.txt
+go test -run=^$ -bench=^BenchmarkBinaryOrderedUUID -benchtime=5s -count=10 | tee stat5.txt
+
+benchstat stat1.txt stat2.txt stat3.txt stat4.txt stat5.txt
+```
+
 ## Benchmarks
 
-### 1M records
-
-Insert 100 record per batch.
-
 ```bash
-go test -bench=Insert -benchmem -benchtime=10s
-
-BenchmarkInsertAutoIncrementID-8        1000000000               0.01174 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertUUID-8                   1000000000               0.02422 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertOrderedUUID-8            1000000000               0.01864 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertBinaryUUID-8             1000000000               0.03470 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertBinaryOrderedUUID-8      1000000000               0.01518 ns/op         0 B/op          0 allocs/op
+                  │ autoincr.txt │                uuid.txt                │          ordered-uuid.txt           │              bin-uuid.txt              │        bin-ordered-uuid.txt         │
+                  │    sec/op    │    sec/op      vs base                 │   sec/op     vs base                │    sec/op      vs base                 │   sec/op     vs base                │
+Insert-8             576.4µ ± 2%   2050.9µ ± 11%  +255.84% (p=0.000 n=10)   964.7µ ± 6%  +67.37% (p=0.000 n=10)   3175.2µ ± 44%  +450.90% (p=0.000 n=10)   861.1µ ± 2%  +49.40% (p=0.000 n=10)
+FindByID-8           63.90µ ± 5%    66.17µ ±  1%    +3.56% (p=0.000 n=10)   67.26µ ± 1%   +5.26% (p=0.000 n=10)    65.37µ ±  1%    +2.31% (p=0.000 n=10)   65.83µ ± 0%   +3.03% (p=0.000 n=10)
+GetList-8            76.33µ ± 0%    83.68µ ±  2%    +9.63% (p=0.000 n=10)   84.36µ ± 3%  +10.52% (p=0.000 n=10)    74.73µ ±  0%    -2.10% (p=0.000 n=10)   74.97µ ± 1%   -1.78% (p=0.000 n=10)
+GetListRandomly-8    111.6µ ± 1%    131.6µ ±  3%   +17.93% (p=0.000 n=10)   136.4µ ± 1%  +22.27% (p=0.000 n=10)    115.1µ ±  1%    +3.19% (p=0.000 n=10)   115.4µ ± 6%   +3.42% (p=0.000 n=10)
+geomean              133.1µ         196.6µ         +47.74%                  165.3µ       +24.22%                   205.6µ         +54.47%                  148.8µ       +11.82%
 ```
 
-Find record by id.
+## Reference 
 
-```bash
-go test -bench=FindByID -benchmem -benchtime=10s
-
-BenchmarkFindByIDAutoIncrementID-8      1000000000               0.004100 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDUUID-8                 1000000000               0.004609 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDOrderedUUID-8          1000000000               0.004292 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDBinaryUUID-8           1000000000               0.004229 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDBinaryOrderedUUID-8    1000000000               0.004241 ns/op        0 B/op          0 allocs/op
-```
-
-<!-- Get 100 records
-
-```bash
-BenchmarkGetListAutoIncrement-8         1000000000               0.004683 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListUUID-8                  1000000000               0.004217 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListOrderedUUID-8           1000000000               0.003579 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryUUID-8            1000000000               0.003749 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.003376 ns/op        0 B/op          0 allocs/op
-``` -->
-
-Get 100 records with order by asc.
-
-```bash
-go test -bench=GetList -benchmem -benchtime=10s
-
-BenchmarkGetListAutoIncrement-8         1000000000               0.004461 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListUUID-8                  1000000000               0.004077 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListOrderedUUID-8           1000000000               0.003914 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryUUID-8            1000000000               0.003745 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.003627 ns/op        0 B/op          0 allocs/op
-```
-
-Get List using random primary key cursor and order by asc.
-
-```bash
-go test -bench=GetRandomly -benchmem -benchtime=10s
-
-BenchmarkGetRandomlyAutoIncrement-8             1000000000               0.002429 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyUUID-8                      1000000000               0.002549 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyOrderedUUID-8               1000000000               0.002311 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyBinaryUUID-8                1000000000               0.002629 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyBinaryOrderedUUID-8         1000000000               0.002601 ns/op        0 B/op          0 allocs/op
-```
-
-### 5M records
-
-Insert 100 record per batch.
-
-```bash
-go test -bench=Insert -benchmem -benchtime=10s
-
-BenchmarkInsertAutoIncrementID-8        1000000000               0.002597 ns/op        0 B/op          0 allocs/op
-BenchmarkInsertUUID-8                   1000000000               0.01232 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertOrderedUUID-8            1000000000               0.006094 ns/op        0 B/op          0 allocs/op
-BenchmarkInsertBinaryUUID-8             1000000000               0.01839 ns/op         0 B/op          0 allocs/op
-BenchmarkInsertBinaryOrderedUUID-8      1000000000               0.003050 ns/op        0 B/op          0 allocs/op
-```
-
-Find record by id.
-
-```bash
-go test -bench=FindByID -benchmem -benchtime=10s
-
-BenchmarkFindByIDAutoIncrementID-8      1000000000               0.002176 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDUUID-8                 1000000000               0.002669 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDOrderedUUID-8          1000000000               0.003597 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDBinaryUUID-8           1000000000               0.004033 ns/op        0 B/op          0 allocs/op
-BenchmarkFindByIDBinaryOrderedUUID-8    1000000000               0.003370 ns/op        0 B/op          0 allocs/op
-```
-
-Get 100 records with order by asc.
-
-```bash
-go test -bench=GetList -benchmem -benchtime=10s
-
-BenchmarkGetListAutoIncrement-8         1000000000               0.003550 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListUUID-8                  1000000000               0.002468 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListOrderedUUID-8           1000000000               0.002353 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryUUID-8            1000000000               0.002485 ns/op        0 B/op          0 allocs/op
-BenchmarkGetListBinaryOrderedUUID-8     1000000000               0.002294 ns/op        0 B/op          0 allocs/op
-```
-
-Get List using random primary key cursor and order by asc.
-
-```bash
-go test -bench=GetRandomly -benchmem -benchtime=10s
-
-BenchmarkGetRandomlyAutoIncrement-8             1000000000               0.002429 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyUUID-8                      1000000000               0.002549 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyOrderedUUID-8               1000000000               0.002311 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyBinaryUUID-8                1000000000               0.002629 ns/op        0 B/op          0 allocs/op
-BenchmarkGetRandomlyBinaryOrderedUUID-8         1000000000               0.002601 ns/op        0 B/op          0 allocs/op
-```
+https://100go.co/89-benchmarks/

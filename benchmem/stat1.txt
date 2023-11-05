@@ -1,0 +1,45 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/si3nloong/sql-pk-benchmark
+BenchmarkInsert-8        	   10768	    529767 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    577959 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10963	    582673 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    566550 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    576636 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    567429 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    579696 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    581844 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    574711 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkInsert-8        	   10000	    576088 ns/op	   22631 B/op	     225 allocs/op
+BenchmarkFindByID-8      	   90594	     64235 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   90668	     65091 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   91098	     64969 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   90916	     64157 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   90842	     63787 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   90787	     63945 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   98738	     60447 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   94890	     60991 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   91068	     63813 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkFindByID-8      	   91268	     63852 ns/op	    1064 B/op	      33 allocs/op
+BenchmarkGetList-8       	   78250	     76333 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78602	     76278 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78540	     76278 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78576	     76662 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78460	     76331 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78541	     76900 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78356	     76331 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78524	     76511 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78558	     76324 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetList-8       	   78667	     76213 ns/op	   23864 B/op	     622 allocs/op
+BenchmarkGetListRandomly-8   	   52126	    111583 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52834	    111379 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52592	    111751 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52684	    112038 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52525	    112257 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52734	    111457 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   47181	    114520 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52705	    111545 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52492	    111502 ns/op	   20096 B/op	     529 allocs/op
+BenchmarkGetListRandomly-8   	   52754	    111483 ns/op	   20096 B/op	     529 allocs/op
+PASS
+ok  	github.com/si3nloong/sql-pk-benchmark	562.058s
