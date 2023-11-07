@@ -11,12 +11,6 @@ import (
 	"github.com/si3nloong/sqlgen/sequel/db"
 )
 
-const (
-// insertCount = 1000
-// roundCount = 20
-// findCount = 10
-)
-
 func setup[T interface {
 	sequel.Migrator
 	sequel.Tabler
@@ -30,99 +24,47 @@ func setup[T interface {
 	}
 }
 
+func benchmarkInsert[T interface {
+	sequel.Migrator
+	sequel.Columner
+	sequel.Tabler
+	sequel.Valuer
+}](b *testing.B, callback func() []T) {
+	var (
+		ctx, cleanUp = setup[T]()
+		data         []T
+		err          error
+	)
+	defer cleanUp()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		data = callback()
+		b.StartTimer()
+		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func BenchmarkAutoIncrementIDInsert(b *testing.B) {
-	var (
-		ctx, cleanUp = setup[AutoIncrID]()
-		data         []AutoIncrID
-		err          error
-	)
-	defer cleanUp()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		data = AutoIncrIDBatch()
-		b.StartTimer()
-		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
-			b.Fatal(err)
-		}
-	}
+	benchmarkInsert(b, AutoIncrIDBatch)
 }
-
 func BenchmarkUUIDInsert(b *testing.B) {
-	var (
-		ctx, cleanUp = setup[NormalUUID]()
-		data         []NormalUUID
-		err          error
-	)
-	defer cleanUp()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		data = NormalUUIDBatch()
-		b.StartTimer()
-		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
-			b.Fatal(err)
-		}
-	}
+	benchmarkInsert(b, NormalUUIDBatch)
 }
-
 func BenchmarkOrderedUUIDInsert(b *testing.B) {
-	var (
-		ctx, cleanUp = setup[NormalOrderedUUID]()
-		data         []NormalOrderedUUID
-		err          error
-	)
-	defer cleanUp()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		data = NormalOrderedUUIDBatch()
-		b.StartTimer()
-		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
-			b.Fatal(err)
-		}
-	}
+	benchmarkInsert(b, NormalOrderedUUIDBatch)
 }
-
 func BenchmarkBinaryUUIDInsert(b *testing.B) {
-	var (
-		ctx, cleanUp = setup[BinaryUUID]()
-		data         []BinaryUUID
-		err          error
-	)
-	defer cleanUp()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		data = BinaryUUIDBatch()
-		b.StartTimer()
-		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
-			b.Fatal(err)
-		}
-	}
+	benchmarkInsert(b, BinaryUUIDBatch)
 }
-
 func BenchmarkBinaryOrderedUUIDInsert(b *testing.B) {
-	var (
-		ctx, cleanUp = setup[BinaryOrderedUUID]()
-		data         []BinaryOrderedUUID
-		err          error
-	)
-	defer cleanUp()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		data = BinaryOrderedUUIDBatch()
-		b.StartTimer()
-		if _, err = db.InsertInto(ctx, dbConn, data); err != nil {
-			b.Fatal(err)
-		}
-	}
+	benchmarkInsert(b, BinaryOrderedUUIDBatch)
+}
+func BenchmarkSnowflakeIDInsert(b *testing.B) {
+	benchmarkInsert(b, SnowflakeIDBatch)
 }
 
 func findRandomly[T interface {
@@ -178,21 +120,20 @@ func benchmarkFindByID[T interface {
 func BenchmarkAutoIncrementIDFindByID(b *testing.B) {
 	benchmarkFindByID[AutoIncrID](b)
 }
-
 func BenchmarkUUIDFindByID(b *testing.B) {
 	benchmarkFindByID[NormalUUID](b)
 }
-
 func BenchmarkOrderedUUIDFindByID(b *testing.B) {
 	benchmarkFindByID[NormalOrderedUUID](b)
 }
-
 func BenchmarkBinaryUUIDFindByID(b *testing.B) {
 	benchmarkFindByID[BinaryUUID](b)
 }
-
 func BenchmarkBinaryOrderedUUIDFindByID(b *testing.B) {
 	benchmarkFindByID[BinaryOrderedUUID](b)
+}
+func BenchmarkSnowflakeIDFindByID(b *testing.B) {
+	benchmarkFindByID[SnowflakeID](b)
 }
 
 // func getList[T interface {
@@ -255,6 +196,9 @@ func BenchmarkBinaryUUIDGetList(b *testing.B) {
 func BenchmarkBinaryOrderedUUIDGetList(b *testing.B) {
 	benchmarkGetList[BinaryOrderedUUID](b)
 }
+func BenchmarkSnowflakeIDGetList(b *testing.B) {
+	benchmarkGetList[SnowflakeID](b)
+}
 
 func benchmarkGetRandomly[T interface {
 	sequel.Tabler
@@ -315,4 +259,7 @@ func BenchmarkBinaryUUIDGetRandomly(b *testing.B) {
 }
 func BenchmarkBinaryOrderedUUIDGetRandomly(b *testing.B) {
 	benchmarkGetRandomly[BinaryOrderedUUID](b)
+}
+func BenchmarkSnowflakeIDGetRandomly(b *testing.B) {
+	benchmarkGetRandomly[SnowflakeID](b)
 }

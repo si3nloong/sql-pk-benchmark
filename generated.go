@@ -184,3 +184,28 @@ func (v NormalOrderedUUID) Values() []any {
 func (v *NormalOrderedUUID) Addrs() []any {
 	return []any{(sql.Scanner)(&v.ID), (*time.Time)(&v.record.Created)}
 }
+
+func (SnowflakeID) CreateTableStmt() string {
+	return "CREATE TABLE IF NOT EXISTS `snowflake_id` (`id` BIGINT UNSIGNED NOT NULL,`created` DATETIME NOT NULL,PRIMARY KEY (`id`));"
+}
+func (SnowflakeID) AlterTableStmt() string {
+	return "ALTER TABLE `snowflake_id` MODIFY `id` BIGINT UNSIGNED NOT NULL,MODIFY `created` DATETIME NOT NULL AFTER `id`;"
+}
+func (SnowflakeID) TableName() string {
+	return "`snowflake_id`"
+}
+func (SnowflakeID) Columns() []string {
+	return []string{"`id`", "`created`"}
+}
+func (v SnowflakeID) IsAutoIncr() bool {
+	return false
+}
+func (v SnowflakeID) PK() (columnName string, pos int, value driver.Value) {
+	return "`id`", 0, int64(v.ID)
+}
+func (v SnowflakeID) Values() []any {
+	return []any{int64(v.ID), time.Time(v.record.Created)}
+}
+func (v *SnowflakeID) Addrs() []any {
+	return []any{types.Integer(&v.ID), (*time.Time)(&v.record.Created)}
+}

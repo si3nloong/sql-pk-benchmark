@@ -5,6 +5,8 @@ import (
 	"time"
 	t "time"
 
+	"github.com/godruoyi/go-snowflake"
+
 	"github.com/gofrs/uuid/v5"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -134,6 +136,22 @@ func NormalOrderedUUIDBatch() []NormalOrderedUUID {
 	for i := range data {
 		v := NormalOrderedUUID{}
 		v.ID, _ = uuid.NewV7()
+		v.Created = t.Now()
+		data[i] = v
+	}
+	return data
+}
+
+type SnowflakeID struct {
+	ID uint64 `sql:",pk"`
+	record
+}
+
+func SnowflakeIDBatch() []SnowflakeID {
+	data := make([]SnowflakeID, recordCount)
+	for i := range data {
+		v := SnowflakeID{}
+		v.ID = snowflake.ID()
 		v.Created = t.Now()
 		data[i] = v
 	}
