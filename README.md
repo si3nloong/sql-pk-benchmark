@@ -44,7 +44,7 @@ benchstat stat1.txt stat2.txt stat3.txt stat4.txt stat5.txt stat6.txt
 goos: darwin
 goarch: arm64
 pkg: github.com/si3nloong/sql-pk-benchmark
-              │ autoincr_id.txt │                uuid.txt                │           ordered-uuid.txt           │             bin-uuid.txt              │         bin-ordered-uuid.txt         │           snowflake_id.txt           │
+              │ autoincr-id.txt │                uuid.txt                │           ordered-uuid.txt           │             bin-uuid.txt              │         bin-ordered-uuid.txt         │           snowflake-id.txt           │
               │     sec/op      │    sec/op      vs base                 │    sec/op     vs base                │    sec/op      vs base                │    sec/op     vs base                │    sec/op     vs base                │
 Insert-8            913.2µ ± 9%   1934.3µ ± 23%  +111.82% (p=0.000 n=10)   1351.1µ ± 7%  +47.95% (p=0.000 n=10)   1529.1µ ± 20%  +67.45% (p=0.000 n=10)   1118.6µ ± 1%  +22.49% (p=0.000 n=10)   1050.7µ ± 1%  +15.06% (p=0.000 n=10)
 FindByID-8          95.32µ ± 1%   101.81µ ±  2%    +6.80% (p=0.000 n=10)    98.90µ ± 3%   +3.75% (p=0.001 n=10)   101.31µ ±  4%   +6.28% (p=0.000 n=10)    99.90µ ± 4%   +4.80% (p=0.001 n=10)   107.83µ ± 4%  +13.12% (p=0.000 n=10)
