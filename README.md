@@ -9,7 +9,7 @@
 <p>Memory: 16GB</p>
 <p>OS: macOS Ventura 13.5.1</p>
 
-Record set: **1,000,000** (1M) and **5,000,000** (5M)
+Record set: **5,000,000** (5M)
 
 ## Space Allocation
 
