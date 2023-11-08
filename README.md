@@ -13,14 +13,14 @@ Record set: **1,000,000** (1M) and **5,000,000** (5M)
 
 ## Space Allocation
 
-| Statement                         | Size (MB) in 1M records | Size (MB) in 5M records |
-| --------------------------------- | ----------------------: | ----------------------: |
-| Auto Increment BigInt Primary Key |                    32.6 |                   125.2 |
-| UUID Primary Key                  |                    62.7 |                   506.8 |
-| Ordered UUID Primary Key          |                    62.7 |                   350.0 |
-| Binary UUID Primary Key           |                    41.6 |                   352.7 |
-| Ordered Binary UUID Primary Key   |                    41.6 |                   205.3 |
-| Snowflake ID                      |                   157.2 |                   202.3 |
+| Statement                         | Size (MB) in 5M records |
+| --------------------------------- | ----------------------: |
+| Auto Increment BigInt Primary Key |                   125.2 |
+| UUID Primary Key                  |                   506.8 |
+| Ordered UUID Primary Key          |                   350.0 |
+| Binary UUID Primary Key           |                   352.7 |
+| Ordered Binary UUID Primary Key   |                   205.3 |
+| Snowflake ID                      |                   202.3 |
 
 ## How to run tests?
 
@@ -41,13 +41,16 @@ benchstat stat1.txt stat2.txt stat3.txt stat4.txt stat5.txt stat6.txt
 ## Benchmarks
 
 ```bash
-                   │ autoincr.txt │                uuid.txt                │          ordered-uuid.txt           │              bin-uuid.txt              │        bin-ordered-uuid.txt         │            snowflake.txt             │
-                  │    sec/op    │    sec/op      vs base                 │   sec/op     vs base                │    sec/op      vs base                 │   sec/op     vs base                │    sec/op     vs base                │
-Insert-8             576.4µ ± 2%   2050.9µ ± 11%  +255.84% (p=0.000 n=10)   964.7µ ± 6%  +67.37% (p=0.000 n=10)   3175.2µ ± 44%  +450.90% (p=0.000 n=10)   861.1µ ± 2%  +49.40% (p=0.000 n=10)   1108.8µ ± 2%  +92.38% (p=0.000 n=10)
-FindByID-8           63.90µ ± 5%    66.17µ ±  1%    +3.56% (p=0.000 n=10)   67.26µ ± 1%   +5.26% (p=0.000 n=10)    65.37µ ±  1%    +2.31% (p=0.000 n=10)   65.83µ ± 0%   +3.03% (p=0.000 n=10)   108.66µ ± 4%  +70.05% (p=0.000 n=10)
-GetList-8            76.33µ ± 0%    83.68µ ±  2%    +9.63% (p=0.000 n=10)   84.36µ ± 3%  +10.52% (p=0.000 n=10)    74.73µ ±  0%    -2.10% (p=0.000 n=10)   74.97µ ± 1%   -1.78% (p=0.000 n=10)   123.87µ ± 5%  +62.28% (p=0.000 n=10)
-GetListRandomly-8    111.6µ ± 1%    131.6µ ±  3%   +17.93% (p=0.000 n=10)   136.4µ ± 1%  +22.27% (p=0.000 n=10)    115.1µ ±  1%    +3.19% (p=0.000 n=10)   115.4µ ± 6%   +3.42% (p=0.000 n=10)    188.5µ ± 1%  +69.01% (p=0.000 n=10)
-geomean              133.1µ         196.6µ         +47.74%                  165.3µ       +24.22%                   205.6µ         +54.47%                  148.8µ       +11.82%                   230.3µ       +73.07%
+goos: darwin
+goarch: arm64
+pkg: github.com/si3nloong/sql-pk-benchmark
+              │ autoincr_id.txt │                uuid.txt                │           ordered-uuid.txt           │             bin-uuid.txt              │         bin-ordered-uuid.txt         │           snowflake_id.txt           │
+              │     sec/op      │    sec/op      vs base                 │    sec/op     vs base                │    sec/op      vs base                │    sec/op     vs base                │    sec/op     vs base                │
+Insert-8            913.2µ ± 9%   1934.3µ ± 23%  +111.82% (p=0.000 n=10)   1351.1µ ± 7%  +47.95% (p=0.000 n=10)   1529.1µ ± 20%  +67.45% (p=0.000 n=10)   1118.6µ ± 1%  +22.49% (p=0.000 n=10)   1050.7µ ± 1%  +15.06% (p=0.000 n=10)
+FindByID-8          95.32µ ± 1%   101.81µ ±  2%    +6.80% (p=0.000 n=10)    98.90µ ± 3%   +3.75% (p=0.001 n=10)   101.31µ ±  4%   +6.28% (p=0.000 n=10)    99.90µ ± 4%   +4.80% (p=0.001 n=10)   107.83µ ± 4%  +13.12% (p=0.000 n=10)
+GetList-8           117.9µ ± 3%    121.5µ ±  1%    +3.04% (p=0.000 n=10)    127.1µ ± 2%   +7.85% (p=0.000 n=10)    117.3µ ±  1%        ~ (p=0.912 n=10)    114.0µ ± 1%   -3.26% (p=0.001 n=10)    118.3µ ± 2%        ~ (p=1.000 n=10)
+GetRandomly-8       176.2µ ± 0%    211.8µ ±  2%   +20.19% (p=0.000 n=10)    215.7µ ± 3%  +22.40% (p=0.000 n=10)    181.9µ ±  3%   +3.19% (p=0.002 n=10)    180.6µ ± 3%   +2.50% (p=0.000 n=10)    191.9µ ± 5%   +8.92% (p=0.000 n=10)
+geomean             206.2µ         266.8µ         +29.38%                   246.0µ       +19.31%                   239.8µ        +16.27%                   219.0µ        +6.22%                   225.2µ        +9.21%
 ```
 
 ## Reference

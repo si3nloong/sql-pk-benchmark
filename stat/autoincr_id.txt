@@ -1,0 +1,45 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/si3nloong/sql-pk-benchmark
+BenchmarkInsert-8        	    6804	    908252 ns/op
+BenchmarkInsert-8        	    7544	    911323 ns/op
+BenchmarkInsert-8        	    7471	    911375 ns/op
+BenchmarkInsert-8        	    7579	    923557 ns/op
+BenchmarkInsert-8        	    7681	    921319 ns/op
+BenchmarkInsert-8        	    8187	    928153 ns/op
+BenchmarkInsert-8        	    7465	    914998 ns/op
+BenchmarkInsert-8        	    7581	    919050 ns/op
+BenchmarkInsert-8        	    7514	    833430 ns/op
+BenchmarkInsert-8        	    7531	    820605 ns/op
+BenchmarkFindByID-8      	   61628	     94819 ns/op
+BenchmarkFindByID-8      	   61309	     95435 ns/op
+BenchmarkFindByID-8      	   60968	     94943 ns/op
+BenchmarkFindByID-8      	   61066	     95625 ns/op
+BenchmarkFindByID-8      	   60565	     96139 ns/op
+BenchmarkFindByID-8      	   61323	     95038 ns/op
+BenchmarkFindByID-8      	   61350	     96349 ns/op
+BenchmarkFindByID-8      	   61671	     95213 ns/op
+BenchmarkFindByID-8      	   61399	     94817 ns/op
+BenchmarkFindByID-8      	   59102	     99780 ns/op
+BenchmarkGetList-8       	   48020	    119890 ns/op
+BenchmarkGetList-8       	   49363	    119719 ns/op
+BenchmarkGetList-8       	   50145	    119810 ns/op
+BenchmarkGetList-8       	   49988	    119752 ns/op
+BenchmarkGetList-8       	   49574	    118689 ns/op
+BenchmarkGetList-8       	   51139	    117060 ns/op
+BenchmarkGetList-8       	   51814	    115000 ns/op
+BenchmarkGetList-8       	   51962	    114711 ns/op
+BenchmarkGetList-8       	   51848	    114882 ns/op
+BenchmarkGetList-8       	   51992	    115027 ns/op
+BenchmarkGetRandomly-8   	   33584	    176379 ns/op
+BenchmarkGetRandomly-8   	   33676	    176281 ns/op
+BenchmarkGetRandomly-8   	   33734	    176056 ns/op
+BenchmarkGetRandomly-8   	   33655	    176030 ns/op
+BenchmarkGetRandomly-8   	   33811	    175962 ns/op
+BenchmarkGetRandomly-8   	   33548	    176181 ns/op
+BenchmarkGetRandomly-8   	   33696	    175982 ns/op
+BenchmarkGetRandomly-8   	   33763	    176518 ns/op
+BenchmarkGetRandomly-8   	   33562	    176627 ns/op
+BenchmarkGetRandomly-8   	   33481	    176804 ns/op
+PASS
+ok  	github.com/si3nloong/sql-pk-benchmark	497.673s
